@@ -48,6 +48,14 @@ print_info() {
     printf 'File:; %s\n' "$1"
     printf "Count of lines:; $(wc -l < "$1")\n"
     awk '$1 == "ERROR"{counter++} END {printf "Errors:; %d\n", counter + 0}' "$1"
+    result=$(cat "$1" | grep -e "^ERROR" | uniq -c  | sort -n | head -n 5)
+    printf "Top errors:\n"
+    if [[ "$result" == "" ]];then
+        printf "No errors\n"
+    else
+        cat "$1" | grep -e "^ERROR" | sort -n -u | head -n 5
+    fi
+
     )|column -t -o "        " -s ";"
 }
 readonly -f print_info
@@ -64,8 +72,6 @@ main() {
         *)
             print_error "Unknown command" "7"
             return 7
-            ;;
-        esac
-}
+            ;;}
 readonly -f main
 main "$@"
