@@ -17,15 +17,8 @@ printf "info PATHS;print file name,count of lines\n"
 }
 readonly -f print_help
 
-print_log_errors()
-{   local counter=0
-    awk -v counter="$counter" '$1 == "ERROR"{counter++}' $1
-    return counter
-}
-readonly -f print_log_errors
-
 print_error() {
-    printf 'Error - %s. Exit code %s\n' "$1" "$2" | tee -a $ERROR_LOG >&2
+    printf 'Error - %s. Exit code %s\n' "$1" "$2" | tee -a "$ERROR_LOG" >&2
     printf 'Use "help" if you have questions\n' >&2
 }
 readonly -f print_error
@@ -51,10 +44,11 @@ arg_checker() {
 readonly -f arg_checker
 
 print_info() {
-    printf 'File: %s\n' "$1"
-    printf "Count of lines: $(wc -l < "$1")\n"
-    awk '$1 == "ERROR"{counter++} END {printf "Errors: %d\n", counter + 0}' $1
-
+    (
+    printf 'File:; %s\n' "$1"
+    printf "Count of lines:; $(wc -l < "$1")\n"
+    awk '$1 == "ERROR"{counter++} END {printf "Errors:; %d\n", counter + 0}' "$1"
+    )|column -t -o "        " -s ";"
 }
 readonly -f print_info
 
