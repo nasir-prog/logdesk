@@ -48,7 +48,7 @@ print_info() {
     printf 'File:; %s\n' "$1"
     printf "Count of lines:; $(wc -l < "$1")\n"
     awk '$1 == "ERROR"{counter++} END {printf "Errors:; %d\n", counter + 0}' "$1"
-    result=$(cat "$1" | grep -e "^ERROR" | sort |uniq -c | head -n 5 | sed -E 's/^[[:space:]]+([0-9]+)/\1; /' | column -t -s ';'| sort -n -r)
+    result=$(cat "$1" | grep -e "^ERROR" | sort |uniq -c | sed -E 's/^[[:space:]]+([0-9]+)/\1; /' | column -t -s ';'| sort -n -r | head -n 5)
     printf "Top errors:\n"
     if [[ "$result" == "" ]];then
         printf "No errors\n"
