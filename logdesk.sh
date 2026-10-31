@@ -24,21 +24,25 @@ print_error() {
 readonly -f print_error
 
 arg_checker() {
-    if [[ $# -ne 1 ]];then
-        print_error "Utilit can get only one argument" "3"
-        return 3
-    elif [[ ! -e $1 ]];then 
-        print_error "File not found" "4"
-        return 4
-    elif [[ ! -f $1 ]];then
-        print_error "It is not file" "5"
-        return 5
-    elif [[ ! -r $1 ]];then
-        print_error "Cant read this file" "6"
-        return 6
-    else
-        print_info "$1"
-    fi
+    local count="$#"
+    for ((i=1; i<=count; i++));do
+        if [[ ! -e $1 ]];then 
+            print_error "File '$1' not found" "4"
+            shift
+            return 4
+        elif [[ ! -f $1 ]];then
+            print_error "'$1' is not file" "5"
+            shift
+            return 5
+        elif [[ ! -r $1 ]];then
+            print_error "Cant read this file: '$1'" "6"
+            shift
+            return 6
+        else
+            print_info "$1"
+            shift
+        fi
+    done
         
 }
 readonly -f arg_checker
@@ -48,15 +52,17 @@ print_info() {
     printf 'File:; %s\n' "$1"
     printf "Count of lines:; $(wc -l < "$1")\n"
     awk '$1 == "ERROR"{counter++} END {printf "Errors:; %d\n", counter + 0}' "$1"
-    result=$(cat "$1" | grep -e "^ERROR" | sort |uniq -c | sed -E 's/^[[:space:]]+([0-9]+)/\1; /' | column -t -s ';'| sort -n -r | head -n 5)
     printf "Top errors:\n"
+     )|column -t -o "        " -s ";"
+    
+    (
+    result=$(cat "$1" | grep -e "^ERROR" | sort |uniq -c | sed -E 's/^[[:space:]]+([0-9]+)/\1; /' | column -t -s ';'| sort -n -r | head -n 5)
     if [[ "$result" == "" ]];then
-        printf "No errors\n"
+        printf "No errors\n\n"
     else
-        printf "%s\n" "$result"
+        printf "%s\n\n" "$result"
     fi
-
-    )|column -t -o "        " -s ";"
+    )|column -t -s ";"
 }
 readonly -f print_info
 
