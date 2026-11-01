@@ -20,31 +20,38 @@ readonly -f print_help
 print_error() {
     printf 'Error - %s. Exit code %s\n' "$1" "$2" | tee -a "$ERROR_LOG" >&2
     printf 'Use "help" if you have questions\n' >&2
+    printf '\n'
 }
 readonly -f print_error
 
 arg_checker() {
     local count="$#"
+    local flag=0
+    if [[ "$count" -eq 0 ]];then
+        print_error "Files not specified" "8"
+        return 8
+    fi
+    
     for ((i=1; i<=count; i++));do
         if [[ ! -e $1 ]];then 
             print_error "File '$1' not found" "4"
             shift
-            return 4
+            flag=4
         elif [[ ! -f $1 ]];then
-            print_error "'$1' is not file" "5"
+            print_error "'$1' is not file" "4"
             shift
-            return 5
+            flag=4
         elif [[ ! -r $1 ]];then
-            print_error "Cant read this file: '$1'" "6"
+            print_error "Cant read this file: '$1'" "4"
             shift
-            return 6
+            flag=4
         else
             print_info "$1"
             shift
         fi
     done
-        
-}
+    return $flag
+        }
 readonly -f arg_checker
 
 print_info() {
@@ -62,7 +69,7 @@ print_info() {
     else
         printf "%s\n\n" "$result"
     fi
-    )|column -t -s ";"
+    )|column -t -L -s ";"
 }
 readonly -f print_info
 
@@ -74,9 +81,10 @@ main() {
         info)
             shift
             arg_checker "$@"
+            
             ;;
         *)
-            print_error "Unknown command" "7"
+            print_error "Unknown command: '$1'" "7"
             return 7
             ;;
         esac
